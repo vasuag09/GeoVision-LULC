@@ -1,0 +1,33 @@
+project_name: "GeoVision-LULC"
+seed: 42
+data:
+  dataset_dir: "src/data/SEN-2 LULC"
+  batch_size: 32
+  num_workers: 4
+  img_size: 64
+  num_classes: 7
+  classes:
+    - "Water"
+    - "Dense Forest"
+    - "Sparse Forest"
+    - "Barren Land"
+    - "Built Up"
+    - "Agriculture Land"
+    - "Fallow Land"
+
+model:
+  name: "unet"  # unet, deeplabv3+, segnet, segformer, swin_unet
+  in_channels: 3
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  
+training:
+  epochs: 10
+  mixed_precision: false
+  early_stopping_patience: 10
+  save_dir: "checkpoints"
+  log_dir: "logs"
+  loss: "cross_entropy" # cross_entropy, dice, focal
+
+explainability:
+  gradcam_layer: "auto"

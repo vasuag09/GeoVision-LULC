@@ -1,0 +1,3 @@
+name,mIoU,Size (MB)
+DeepLabV3+,0.4243,476.1
+SegFormer,0.4614,44.8

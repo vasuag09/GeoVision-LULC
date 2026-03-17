@@ -1,0 +1,37 @@
+model:
+  name: "sam"
+  in_channels: 3
+  learning_rate: 0.00005
+  weight_decay: 0.01
+
+data:
+  dataset_dir: "src/data/SEN-2 LULC"
+  img_size: 256 # For local Mac testing/training, 256 is a good balance for speed vs SAM context
+  batch_size: 8 # M4 Pro can handle higher batch size for SAM at 256px
+  num_workers: 0 # MPS works better with 0 workers (main process) to avoid multi-processing overhead on macOS
+  subset_fraction: 0.02 # Use 2% of data (approx 3,000-4,000 images) for fast Foundation fine-tuning
+  num_classes: 7
+  classes: ["Water", "Dense Forest", "Sparse Forest", "Barren Land", "Built Up", "Agriculture Land", "Fallow Land"]
+  augmentation:
+    horizontal_flip: true
+    vertical_flip: true
+    normalize: true
+
+training:
+  epochs: 10 # 5-10 epochs is enough for a foundation model
+  early_stopping_patience: 3
+  mixed_precision: true # MPS supports float16
+  save_dir: "checkpoints_sam_mac"
+  loss:
+    type: "hybrid"
+    ce_weight: 0.5
+    dice_weight: 0.5
+
+optimizer:
+  type: "AdamW"
+  learning_rate: 0.00005
+  weight_decay: 0.01
+
+scheduler:
+  type: "cosine"
+  T_max: 10

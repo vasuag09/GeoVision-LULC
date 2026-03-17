@@ -1,0 +1,61 @@
+project_name: "GeoVision-LULC-DeepLabV3Plus"
+seed: 42
+
+data:
+  dataset_dir: "src/data/SEN-2 LULC"
+  img_size: 128
+  batch_size: 32
+  num_workers: 4
+  num_classes: 7
+
+  classes:
+    - "Water"
+    - "Dense Forest"
+    - "Sparse Forest"
+    - "Barren Land"
+    - "Built Up"
+    - "Agriculture Land"
+    - "Fallow Land"
+
+  augmentation:
+    horizontal_flip: true
+    vertical_flip: false
+    normalize: true
+
+model:
+  name: "deeplabv3+"
+  backbone: "resnet50"
+  pretrained: true
+  in_channels: 3
+
+optimizer:
+  name: "adamw"
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+
+scheduler:
+  name: "cosine"
+  warmup_epochs: 3
+
+training:
+  epochs: 40
+  mixed_precision: true
+  early_stopping_patience: 8
+
+  loss:
+    type: "hybrid"
+    cross_entropy_weighted: true
+    dice_weight: 0.5
+    ce_weight: 0.5
+
+  metrics:
+    - "miou"
+    - "pixel_accuracy"
+    - "f1"
+    - "class_iou"
+
+  save_dir: "/content/drive/MyDrive/checkpoints_deeplabv3plus"
+  log_dir: "logs"
+
+explainability:
+  gradcam_layer: "auto"
