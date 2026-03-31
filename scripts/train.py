@@ -1,4 +1,5 @@
 import os
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 import yaml
 import torch
 from torch.utils.data import DataLoader
@@ -26,7 +27,10 @@ def main():
     torch.manual_seed(config.get('seed', 42))
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu')
-    
+
+    if device.type == 'cuda':
+        print(f"GPU: {torch.cuda.get_device_name(0)} | VRAM: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f}GB")
+
     # Needs to be mocked or points to real dataset
     data_dir = config['data']['dataset_dir']
     img_size = config['data']['img_size']
@@ -47,8 +51,23 @@ def main():
     val_dataset = Sen2LULCDataset(data_dir, split="val", transforms=get_val_transforms(config['data']),
                                   subset_fraction=subset_fraction, seed=seed)
     
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, drop_last=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+        drop_last=True,
+        pin_memory=(device.type == 'cuda'),
+        persistent_workers=(num_workers > 0),
+    )
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=(device.type == 'cuda'),
+        persistent_workers=(num_workers > 0),
+    )
     
     model = build_model(config).to(device)
     

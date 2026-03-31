@@ -75,8 +75,15 @@ def generate_gradcam_visualizations(config_path, weights_path, data_dir, output_
     elif model_name == "segnet":
         # Target the last layer of the highest decoder block
         target_layers = [model.dec_conv1[-1]]
+    elif model_name == "segformer":
+        # Target the last layer norm of the encoder backbone
+        # Layers in HF SegFormer: model.segformer.encoder.layer_norm[0...3]
+        target_layers = [model.model.segformer.encoder.layer_norm[-1]]
+    elif model_name == "swin_unet":
+        # Target the final layernorm in the Swin backbone
+        target_layers = [model.model.swin.layernorm]
     else:
-        print(f"Explainability GradCAM not currently mapping layers for transformer: {model_name}")
+        print(f"Explainability GradCAM not currently mapping layers for architecture: {model_name}")
         return
         
     dataset = Sen2LULCDataset(data_dir, split="test", transforms=get_val_transforms(config['data']['img_size']))

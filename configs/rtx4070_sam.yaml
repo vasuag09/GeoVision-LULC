@@ -1,0 +1,36 @@
+model:
+  name: "sam"
+  in_channels: 3
+  learning_rate: 0.00005  # SAM needs very low LR for fine-tuning
+  weight_decay: 0.01
+
+data:
+  dataset_dir: "src/data/SEN-2 LULC"
+  img_size: 1024  # SAM natively expects 1024, but our head will resize
+  batch_size: 4   # Encoder is frozen (no gradient buffers); 4 fits within 12GB VRAM
+  num_workers: 8
+  num_classes: 7
+  classes: ["Water", "Dense Forest", "Sparse Forest", "Barren Land", "Built Up", "Agriculture Land", "Fallow Land"]
+  augmentation:
+    horizontal_flip: true
+    vertical_flip: true
+    normalize: true
+
+training:
+  epochs: 40
+  early_stopping_patience: 5
+  mixed_precision: true
+  save_dir: "checkpoints_sam"
+  loss:
+    type: "hybrid"
+    ce_weight: 0.5
+    dice_weight: 0.5
+
+optimizer:
+  type: "AdamW"
+  learning_rate: 0.00005
+  weight_decay: 0.01
+
+scheduler:
+  type: "cosine"
+  T_max: 40

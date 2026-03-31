@@ -1,0 +1,36 @@
+model:
+  name: "segformer"
+  in_channels: 3
+  learning_rate: 0.00006
+  weight_decay: 0.01
+
+data:
+  dataset_dir: "src/data/SEN-2 LULC"
+  img_size: 128
+  batch_size: 64
+  num_workers: 12
+  num_classes: 7
+  classes: ["Water", "Dense Forest", "Sparse Forest", "Barren Land", "Built Up", "Agriculture Land", "Fallow Land"]
+  augmentation:
+    horizontal_flip: true
+    vertical_flip: true
+    normalize: true
+
+training:
+  epochs: 80
+  early_stopping_patience: 10
+  mixed_precision: true
+  save_dir: "checkpoints_segformer"
+  loss:
+    type: "hybrid"
+    ce_weight: 0.5
+    dice_weight: 0.5
+
+optimizer:
+  type: "AdamW"
+  learning_rate: 0.00006
+  weight_decay: 0.01
+
+scheduler:
+  type: "cosine"
+  T_max: 80

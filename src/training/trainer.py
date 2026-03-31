@@ -26,7 +26,12 @@ class Trainer:
         os.makedirs(self.save_dir, exist_ok=True)
         
         self.scaler = torch.amp.GradScaler('cuda') if self.use_amp and self.device.type == 'cuda' else None
-        
+
+        if self.device.type == 'cuda':
+            torch.backends.cudnn.benchmark = True
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
+
         self.best_mIoU = 0.0
         self.epochs_no_improve = 0
         self.start_epoch = 1
