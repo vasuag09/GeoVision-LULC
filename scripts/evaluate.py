@@ -109,18 +109,12 @@ if __name__ == "__main__":
         files_to_eval = [os.path.join(args.configs_dir, f) for f in os.listdir(args.configs_dir) if f.endswith(".yaml")]
         
     for cfg_path in files_to_eval:
-        cfg_name = os.path.basename(cfg_path).replace('.yaml', '')
-        
-        # Checkpoint directory relies on config name unless it is default
-        ckpt_dir = "checkpoints" if cfg_name == "default" else f"checkpoints_{cfg_name}"
-        
-        # Original UNet script was hardcoded to save as best_model_unet.pt
-        if cfg_name == "default":
-             weight_name = "best_model_unet.pt"
-        elif cfg_name == "deeplabv3plus":
-             weight_name = "best_model_deeplabv3+.pt"
-        else:
-             weight_name = f"best_model_{cfg_name}.pt"
+        with open(cfg_path, 'r') as _f:
+            _cfg = yaml.safe_load(_f)
+
+        model_name = _cfg.get('model', {}).get('name', '')
+        ckpt_dir = _cfg.get('training', {}).get('save_dir', 'checkpoints')
+        weight_name = f"best_model_{model_name}.pt"
              
         weight_path = os.path.join(ckpt_dir, weight_name)
         
